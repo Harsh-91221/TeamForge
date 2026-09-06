@@ -13,18 +13,25 @@
   "author": "Harsh Kumar",
   "description": "Backend for TeamForge project management",
   "dependencies": {
+    "add": "^2.0.9",
     "bcrypt": "^5.1.1",
+    "commit": "^0.0.4",
     "cookie-session": "^2.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "git": "^0.1.5",
     "jsonwebtoken": "^9.0.2",
+    "main": "^1000.0.1",
     "mongoose": "^8.9.2",
     "nodemon": "^3.1.9",
+    "origin": "^0.5.8",
+    "package-lock.json": "^1.0.0",
     "passport": "^0.5.3",
     "passport-google-oauth20": "^2.0.0",
     "passport-jwt": "^4.0.1",
     "passport-local": "^1.0.0",
+    "push": "^0.1.0",
     "uuid": "^11.0.3",
     "zod": "^3.24.1"
   },
@@ -45,4 +52,3 @@
     "typescript": "^5.7.2"
   }
 }
-
