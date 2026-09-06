@@ -3,9 +3,8 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "author": "roshan prajapati",
-  "license": "ISC",
-  "description": "Frontend for monkey website (project managmenet)",
+  "author": "Harsh Kumar",
+  "description": "Frontend for TeamForge project management",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

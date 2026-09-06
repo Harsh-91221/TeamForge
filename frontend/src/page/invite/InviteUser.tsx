@@ -56,16 +56,16 @@ const InviteUser = () => {
       <div className="flex w-full max-w-md flex-col gap-6">
         <Link to="/" className="flex items-center gap-2 self-center font-medium">
           <Logo />
-          Monkey
+          TeamForge
         </Link>
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader className="text-center">
               <CardTitle className="text-xl">
-                Hey there! You're invited to join a Monkey Workspace!
+                Hey there! You're invited to join a TeamForge Workspace!
               </CardTitle>
               <CardDescription>
-                Looks like you need to be logged into your Monkey account to join this
+                Looks like you need to be logged into your TeamForge account to join this
                 Workspace.
               </CardDescription>
             </CardHeader>

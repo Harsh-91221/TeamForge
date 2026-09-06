@@ -1,12 +1,12 @@
-# 🐒 Monkey - Project Management SaaS
+# TeamForge - Project Management SaaS
 
-Monkey is a powerful, scalable multi-tenancy project management platform built for modern teams and real-world B2B collaboration. With rich features like task management, project tracking, role-based access control, and data analytics, Monkey enables organizations to streamline productivity, enhance collaboration, and manage projects efficiently across multiple workspaces.
+TeamForge is a powerful, scalable multi-tenancy project management platform built for modern teams and real-world B2B collaboration. With rich features like task management, project tracking, role-based access control, and data analytics, TeamForge enables organizations to streamline productivity, enhance collaboration, and manage projects efficiently across multiple workspaces.
 
 ---
 
 ## 🚀 Demo
 
-> Live Link [Monkey - Project management](https://prajapatiroshan.github.io/project-management)
+> Live Link [TeamForge - Project management](https://harsh-91221.github.io/project-management)
 
 ---
 
@@ -74,7 +74,7 @@ Monkey is a powerful, scalable multi-tenancy project management platform built f
 
 ## 🌍 Use Cases & Scope
 
-Monkey is designed to support:
+TeamForge is designed to support:
 
 - B2B SaaS startups
 - Agile product teams
@@ -94,7 +94,7 @@ All backend routes are listed in the main project documentation or docs/api.md (
 
 ## 📞 Contact
 
-Author: Roshan prajapati
+Author: Harsh Kumar
 
-LinkedIn: [roshan_prajapati](https://www.linkedin.com/in/roshanprajapati/)
+LinkedIn: [Harsh Kumar](https://www.linkedin.com/in/harshkumar91221/)
 
