@@ -4,6 +4,7 @@
   "version": "0.0.0",
   "type": "module",
   "author": "Harsh Kumar",
+  "license": "MIT",
   "description": "Frontend for TeamForge project management",
   "scripts": {
     "dev": "vite",

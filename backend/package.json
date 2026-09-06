@@ -11,6 +11,7 @@
   },
   "keywords": [],
   "author": "Harsh Kumar",
+  "license": "MIT",
   "description": "Backend for TeamForge project management",
   "dependencies": {
     "add": "^2.0.9",
