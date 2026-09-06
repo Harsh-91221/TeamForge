@@ -25,6 +25,10 @@ export const loginOrCreateAccountService = async (data: {
     session.startTransaction(); // Begin a transaction
     console.log('Started Session....'); // Log session start
 
+    if (!email) {
+      throw new BadRequestException('Google account did not provide an email address');
+    }
+
     let user = await UserModel.findOne({ email }).session(session); // Check if a user with the given email exists
 
     if (!user) {
@@ -65,6 +69,24 @@ export const loginOrCreateAccountService = async (data: {
 
       user.currentWorkspace = workspace._id as mongoose.Types.ObjectId; // Set the user's current workspace
       await user.save({ session }); // Save the updated user in the database within the session
+    } else {
+      const linkedAccount = await AccountModel.findOne({
+        userId: user._id,
+        provider,
+      }).session(session);
+
+      if (!linkedAccount) {
+        await AccountModel.create(
+          [
+            {
+              userId: user._id,
+              provider,
+              providerId,
+            },
+          ],
+          { session }
+        );
+      }
     }
     await session.commitTransaction(); // Commit the transaction
     session.endSession(); // End the session

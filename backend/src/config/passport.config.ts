@@ -14,8 +14,13 @@ import {
 import { signJwtToken } from '../utils/jwt';
 import { StrategyOptions, ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
 
-// Setting up Google OAuth strategy
-passport.use(
+// Setting up Google OAuth strategy when credentials are configured
+if (
+  config.GOOGLE_CLIENT_ID &&
+  config.GOOGLE_CLIENT_SECRET &&
+  config.GOOGLE_CALLBACK_URL
+) {
+  passport.use(
   new GoogleStrategy(
     {
       clientID: config.GOOGLE_CLIENT_ID, // Google client ID from environment variables
@@ -57,7 +62,8 @@ passport.use(
       }
     }
   )
-);
+  );
+}
 
 // Setting up Local authentication strategy (username and password)
 passport.use(

@@ -1,7 +1,7 @@
 // Import environment variables from .env file
 import 'dotenv/config';
 // Import express and related types for building the server
-import express, { NextFunction, Request, Response } from 'express';
+import express, { Request, Response } from 'express';
 // Import CORS middleware for handling cross-origin requests
 import cors from 'cors';
 // Import session middleware for managing user sessions
@@ -21,9 +21,6 @@ import './config/passport.config';
 // Import Passport.js for authentication
 import passport from 'passport';
 // Import custom error class for handling application-specific errors
-import { BadRequestException } from './utils/appError';
-// Import error code enumeration
-import { ErrorCodeEnum } from './enums/error-code.enum';
 // Import authentication routes
 import authRoutes from './routes/auth.route';
 // Import user-related routes
@@ -39,6 +36,7 @@ import projectRoutes from './routes/project.routes';
 // Import task-related routes
 import taskRoutes from './routes/task.route';
 import { passportAuthenticationJWT } from './config/passport.config';
+import { ensureRoles } from './utils/ensure-roles';
 
 // Initialize the Express application
 const app = express();
@@ -69,7 +67,15 @@ app.use(passport.initialize());
 // Enable CORS with specific configuration
 app.use(
   cors({
-    origin: config.FRONTEND_ORIGIN, // Allow requests from the frontend origin
+    origin: (origin, callback) => {
+      const allowedOrigins = config.FRONTEND_ORIGIN.split(',').map((item) => item.trim());
+
+      if (!origin || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(new Error('Origin is not allowed by CORS'));
+    }, // Allow configured local frontend origins
     credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   })
 );
@@ -77,14 +83,7 @@ app.use(
 // Define a test route for the root path
 app.get(
   '/',
-  asyncHandler(async (req: Request, res: Response, next: NextFunction) => {
-    res.send('working...');
-    // Throw a custom bad request error
-    throw new BadRequestException(
-      'This is a bad request',
-      ErrorCodeEnum.AUTH_INVALID_TOKEN
-    );
-    // Send a success response (this line is unreachable due to the error above)
+  asyncHandler(async (req: Request, res: Response) => {
     return res.status(HTTPSTATUS.OK).json({ message: 'Backend Running' });
   })
 );
@@ -124,5 +123,6 @@ app.use(errorHandler);
 app.listen(config.PORT, async () => {
   console.log(`Server listening on port ${config.PORT} in ${config.NODE_ENV} mode`);
   await connectDatabase(); // Connect to the database
+  await ensureRoles();
 });
 

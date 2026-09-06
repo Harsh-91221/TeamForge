@@ -8,17 +8,27 @@ import { registerUserService } from '../services/auth.service'; // Service to ha
 import passport from 'passport'; // Passport.js for authentication
 import { signJwtToken } from '../utils/jwt';
 
+export const getGoogleFrontendCallbackUrl = (params: Record<string, string>) => {
+  const callbackUrl = new URL(config.FRONTEND_GOOGLE_CALLBACK_URL);
+  callbackUrl.hash = `/google/oauth/callback?${new URLSearchParams(params).toString()}`;
+  return callbackUrl.toString();
+};
+
 // Google login callback controller
 export const googleLoginCallback = asyncHandler(async (req: Request, res: Response) => {
   const jwt = req.jwt;
   const currentWorkspace = req.user?.currentWorkspace;
 
   if (!jwt) {
-    return res.redirect(`${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=failure`);
+    return res.redirect(getGoogleFrontendCallbackUrl({ status: 'failure' }));
   }
 
   return res.redirect(
-    `${config.FRONTEND_GOOGLE_CALLBACK_URL}?status=success&access_token=${jwt}&current_workspace=${currentWorkspace}`
+    getGoogleFrontendCallbackUrl({
+      status: 'success',
+      access_token: jwt,
+      current_workspace: String(currentWorkspace || ''),
+    })
   );
 
   // // Retrieve the current workspace from the authenticated user
