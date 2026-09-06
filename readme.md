@@ -6,7 +6,7 @@ TeamForge is a powerful, scalable multi-tenancy project management platform buil
 
 ## 🚀 Demo
 
-> Live Link [TeamForge - Project management](https://harsh-91221.github.io/project-management)
+> Live Link [TeamForge - Project management](https://harsh-91221.github.io/TeamForge)
 
 ---
 

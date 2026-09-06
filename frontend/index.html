@@ -19,7 +19,7 @@
         if (!is404 && !alreadyRedirected) {
           const current = location.pathname + location.search + location.hash;
           const redirect =
-            '/project-management' + current.replace('/project-management', '');
+            '/TeamForge' + current.replace('/TeamForge', '');
           sessionStorage.setItem('redirected', 'true');
           window.location.replace(redirect);
         } else {
