@@ -11,8 +11,9 @@ const connectDatabase = async () => {
     await mongoose.connect(config.MONGO_URI); // Attempt to connect to the MongoDB database using the URI from the config
     console.log('Connected to Mongo Database'); // Log success message if connection is successful
   } catch (error) {
-    console.log('Error connecting to Mongo database'); // Log error message if connection fails
-    process.exit(1); // Exit the process with a failure code
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Error connecting to Mongo database:', message);
+    throw error;
   }
 };
 

@@ -119,10 +119,17 @@ app.use(`${BASE_PATH}/task`, passportAuthenticationJWT, taskRoutes);
 // Use the custom error handler middleware for handling errors
 app.use(errorHandler);
 
-// Start the server and connect to the database
-app.listen(config.PORT, async () => {
-  console.log(`Server listening on port ${config.PORT} in ${config.NODE_ENV} mode`);
-  await connectDatabase(); // Connect to the database
+const startServer = async () => {
+  await connectDatabase();
   await ensureRoles();
+
+  app.listen(config.PORT, () => {
+    console.log(`Server listening on port ${config.PORT} in ${config.NODE_ENV} mode`);
+  });
+};
+
+startServer().catch((error) => {
+  console.error('Server startup failed:', error);
+  process.exit(1);
 });
 
