@@ -30,24 +30,19 @@ API.interceptors.response.use(
     return response;
   },
   async (error) => {
-    const { data } = error.response;
-    // const { data, status } = error.response;
+    const data = error.response?.data;
 
-    // if (data?.errorCode === 'ACCESS_UNAUTHORIZED') {
-    //   window.location.href = '/';
-    //   return;
-    // }
-
-    // if (data === 'Unauthorized' && status === 401) {
-    //   window.location.href = '/';
-    // }
-
-    const customeError: CustomError = {
+    const customError: CustomError = {
       ...error,
-      errorCode: data?.errorCode || 'UNKNOWN_ERROR',
+      message:
+        data?.message ||
+        (error.response
+          ? 'The request could not be completed.'
+          : 'Cannot connect to the server. Make sure the backend is running and try again.'),
+      errorCode: data?.errorCode || (error.response ? 'UNKNOWN_ERROR' : 'NETWORK_ERROR'),
     };
 
-    return Promise.reject(customeError);
+    return Promise.reject(customError);
   }
 );
 

@@ -10,9 +10,9 @@ const Logo = (props: { url?: string }) => {
           <AudioWaveform className="size-4" />
         </div> */}
         <img
-          src="images/project-management.png"
-          alt="f"
-          className="inline-block w-[40px]"
+          src="images/teamforge-logo.png"
+          alt="TeamForge"
+          className="inline-block h-10 w-10 rounded-lg"
         />
       </Link>
     </div>
