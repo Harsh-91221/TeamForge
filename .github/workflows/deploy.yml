@@ -39,14 +39,18 @@ jobs:
 
       - name: Copy documentation to dist
         run: |
+          echo "Current directory: $(pwd)"
           echo "Checking for docs folder..."
+          ls -la
           if [ -d "docs" ]; then
-            echo "Docs folder found at root, copying files..."
+            echo "Found docs folder, copying files..."
+            ls -la docs/
             cp -r docs/* ./frontend/dist/
-            echo "Documentation files copied to dist"
+            echo "Files copied successfully"
             ls -la ./frontend/dist/
           else
-            echo "Warning: No docs folder found"
+            echo "ERROR: docs folder not found!"
+            exit 1
           fi
 
       - name: Upload artifact
