@@ -39,11 +39,16 @@ jobs:
 
       - name: Copy documentation to dist
         run: |
+          echo "Checking for docs folder..."
           if [ -d "../docs" ]; then
+            echo "Docs folder found, copying files..."
             cp -r ../docs/* ./frontend/dist/
             echo "Documentation files copied to dist"
+            ls -la ./frontend/dist/
           else
-            echo "No docs folder found"
+            echo "Warning: No docs folder found at ../docs"
+            echo "Current directory contents:"
+            ls -la
           fi
 
       - name: Deploy to GitHub Pages
