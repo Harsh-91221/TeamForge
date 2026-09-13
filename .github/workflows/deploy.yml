@@ -37,22 +37,6 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           FRONTEND_GOOGLE_CALLBACK_URL: https://harsh-91221.github.io/TeamForge/
 
-      - name: Copy documentation to dist
-        run: |
-          echo "Current directory: $(pwd)"
-          echo "Checking for docs folder..."
-          ls -la
-          if [ -d "docs" ]; then
-            echo "Found docs folder, copying files..."
-            ls -la docs/
-            cp -r docs/* ./frontend/dist/
-            echo "Files copied successfully"
-            ls -la ./frontend/dist/
-          else
-            echo "ERROR: docs folder not found!"
-            exit 1
-          fi
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
