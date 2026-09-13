@@ -185,11 +185,9 @@ export const deleteWorkspaceByIdService = async (
     await workspace.deleteOne({ session }); // Delete the workspace
 
     await session.commitTransaction(); // Commit the transaction
-    session.endSession(); // End the session
     return { currentWorkspace: user?.currentWorkspace }; // Return the user's current workspace
   } catch (error) {
     await session.abortTransaction(); // Abort the transaction in case of an error
-    session.endSession(); // End the session
     throw error; // Rethrow the error
   } finally {
     session.endSession(); // Ensure the session is ended

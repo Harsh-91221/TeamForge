@@ -5,7 +5,6 @@ import MemberModel from '../models/member.model';
 import RoleModel from '../models/roles-permission.model';
 import WorkspaceModel from '../models/workspace.model';
 import {
-  BadRequestException,
   NotFoundException,
   UnauthorizedException,
 } from '../utils/appError';
@@ -53,17 +52,6 @@ export const joinWorkspaceByInviteService = async (
     throw new NotFoundException('Invalid invite code or Workspace not found');
   }
 
-  // Check if the user is already a member of the workspace
-  const existingMember = await MemberModel.findOne({
-    userId,
-    workspaceId: workspace._id,
-  }).exec();
-
-  // Throw an error if the user is already a member
-  if (existingMember) {
-    throw new BadRequestException('You are already member of this workspace');
-  }
-
   // Find the default role for new members (e.g., MEMBER role)
   const role = await RoleModel.findOne({
     name: Roles.MEMBER,
@@ -74,18 +62,15 @@ export const joinWorkspaceByInviteService = async (
     throw new NotFoundException('Role not found');
   }
 
-  // Create a new member entry in the database
-  const newMember = new MemberModel({
-    userId, // ID of the user joining the workspace
-    workspaceId: workspace._id, // ID of the workspace
-    role: role._id, // Role assigned to the user
-    joinedAt: new Date(), // Timestamp of when the user joined
-  });
+  // Use upsert to ensure the member exists without race conditions.
+  // If the member already exists, keep their existing role intact.
+  const updatedMember = await MemberModel.findOneAndUpdate(
+    { userId, workspaceId: workspace._id },
+    { $setOnInsert: { role: role._id, joinedAt: new Date() } },
+    { upsert: true, new: true }
+  ).exec();
 
-  // Save the new member to the database
-  await newMember.save();
-
-  // Return the workspace ID and the role name of the new member
-  return { workspaceId: workspace._id, role: role.name };
+  // Return the workspace ID and the role name of the joined/upserted member
+  return { workspaceId: workspace._id, role: updatedMember?.role?.name };
 };
 

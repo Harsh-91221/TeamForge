@@ -1,0 +1,10 @@
+process.env.MONGO_URI = 'mongodb://localhost:27017/test';
+process.env.MONGO_DNS_SERVERS = '1.1.1.1';
+process.env.JWT_SECRET = 'test-secret';
+process.env.SESSION_SECRET = 'test-session-secret';
+process.env.SESSION_EXPIRES_IN = '1d';
+process.env.NODE_ENV = 'test';
+process.env.GOOGLE_CLIENT_ID = '';
+process.env.GOOGLE_CLIENT_SECRET = '';
+process.env.GOOGLE_CALLBACK_URL = '';
+process.env.FRONTEND_GOOGLE_CALLBACK_URL = '';

@@ -4,7 +4,7 @@ import { asyncHandler } from '../middlewares/asyncHandler.middleware'; // Custom
 import { config } from '../config/app.config'; // Configuration file with environment variables
 import { registerSchema } from '../validation/auth.validation'; // Schema for registration validation
 import { HTTPSTATUS } from '../config/http.config'; // HTTP status codes
-import { registerUserService } from '../services/auth.service'; // Service to handle user registration
+import { registerUserService, joinWorkspaceAsMemberOnLogin } from '../services/auth.service'; // Service to handle user registration
 import passport from 'passport'; // Passport.js for authentication
 import { signJwtToken } from '../utils/jwt';
 
@@ -18,6 +18,7 @@ export const getGoogleFrontendCallbackUrl = (params: Record<string, string>) => 
 export const googleLoginCallback = asyncHandler(async (req: Request, res: Response) => {
   const jwt = req.jwt;
   const currentWorkspace = req.user?.currentWorkspace;
+  const inviteCode = req.inviteCode;
 
   if (!jwt) {
     return res.redirect(getGoogleFrontendCallbackUrl({ status: 'failure' }));
@@ -28,6 +29,7 @@ export const googleLoginCallback = asyncHandler(async (req: Request, res: Respon
       status: 'success',
       access_token: jwt,
       current_workspace: String(currentWorkspace || ''),
+      ...(inviteCode ? { inviteCode } : {}),
     })
   );
 
@@ -54,12 +56,24 @@ export const registerUserController = asyncHandler(
     // Validate the request body using the registration schema
     const body = registerSchema.parse({ ...req.body });
 
-    // Call the registration service to create a new user
-    await registerUserService(body);
+    // Call the registration service to create a new user.
+    // If inviteCode was provided, the user is already a member of that workspace
+    // and currentWorkspace is set to the invited workspace.
+    const { user } = await registerUserService({ ...body, returnUser: true });
 
-    // Send a success response with status 201 (Created)
+    if (!user) {
+      return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
+        message: 'User registration failed',
+      });
+    }
+
+    const access_token = signJwtToken({ userId: user._id });
+
+    // Send a success response with status 201 (Created) and the token/user
     return res.status(HTTPSTATUS.CREATED).json({
       message: 'User registered successfully',
+      access_token,
+      user,
     });
   }
 );
@@ -70,7 +84,7 @@ export const loginController = asyncHandler(
     // Authenticate the user using the local strategy configured with Passport
     passport.authenticate(
       'local',
-      (
+      async (
         err: Error | null, // Error object, if any
         user: Express.User | false, // Authenticated user object or false if not authenticated
         info: { message: string } | undefined // Additional information, if available
@@ -87,18 +101,14 @@ export const loginController = asyncHandler(
           });
         }
 
-        // Log the user into the session
-        // req.logIn(user, (err) => {
-        //   if (err) {
-        //     return next(err); // Handle login errors
-        //   }
-
-        //   // Send a success response with the logged-in user information
-        //   return res.status(HTTPSTATUS.OK).json({
-        //     message: 'Logged in successfully',
-        //     user,
-        //   });
-        // });
+        // If the user came from an invite link, join the workspace as a member
+        // (no-op if they're already a member) and update currentWorkspace so the
+        // frontend lands them on the invited workspace.
+        const inviteCode =
+          typeof req.body?.inviteCode === 'string' ? req.body.inviteCode : undefined;
+        if (inviteCode && user?._id) {
+          await joinWorkspaceAsMemberOnLogin(user._id, inviteCode);
+        }
 
         const access_token = signJwtToken({ userId: user._id });
 

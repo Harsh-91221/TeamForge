@@ -13,6 +13,25 @@ import {
 } from '../services/auth.service'; // Authentication services
 import { signJwtToken } from '../utils/jwt';
 import { StrategyOptions, ExtractJwt, Strategy as JwtStrategy } from 'passport-jwt';
+import crypto from 'crypto';
+import jwt from 'jsonwebtoken';
+
+const generateState = (inviteCode?: string) => {
+  const nonce = crypto.randomBytes(16).toString('hex');
+  const token = jwt.sign({ inviteCode, nonce }, config.JWT_SECRET, { expiresIn: '10m' });
+  return token;
+};
+
+const verifyState = (state: string) => {
+  try {
+    const payload = jwt.verify(state, config.JWT_SECRET) as { inviteCode?: string; nonce: string };
+    return payload.inviteCode;
+  } catch {
+    return undefined;
+  }
+};
+
+export { generateState, verifyState };
 
 // Setting up Google OAuth strategy when credentials are configured
 if (
@@ -33,26 +52,30 @@ if (
       try {
         // Extract user information from the profile object returned by Google
         const { email, sub: googleId, picture } = profile._json;
-        console.log(profile, 'profile'); // Debug: Log the full profile object
-        console.log(googleId, 'googleId'); // Debug: Log the Google ID
 
         // Handle missing Google ID case
         if (!googleId) {
           throw new NotFoundException('Google ID (sub) is missing'); // Throw custom exception
         }
 
+        // The `state` param is echoed back by Google and contains a signed invite token.
+        const inviteCode = typeof req.query?.state === 'string' ? verifyState(req.query.state) : undefined;
+        req.inviteCode = inviteCode;
+
         // Call a service to either log in or create a new account using Google credentials
+        // If the user came from an invite link, they join as a MEMBER instead of creating a default workspace.
         const { user } = await loginOrCreateAccountService({
           provider: ProviderEnum.GOOGLE, // Specify Google as the provider
           displayName: profile.displayName, // User's display name
           providerId: googleId, // Unique Google ID
           picture: picture, // User's profile picture
           email: email, // User's email address
+          inviteCode, // Invite code from the invite link (if any)
         });
 
-        const jwt = signJwtToken({ userId: user._id });
+        const jwtToken = signJwtToken({ userId: user._id });
 
-        req.jwt = jwt;
+        req.jwt = jwtToken;
 
         // Indicate successful authentication by passing the user object
         done(null, user);
@@ -65,6 +88,7 @@ if (
   );
 }
 
+// In the auth route, build the Google redirect state with a secure signed token.
 // Setting up Local authentication strategy (username and password)
 passport.use(
   new LocalStrategy(
@@ -119,10 +143,5 @@ passport.serializeUser((user: any, done) => done(null, user));
 passport.deserializeUser((user: any, done) => done(null, user));
 
 export const passportAuthenticationJWT = passport.authenticate('jwt', { session: false });
-// export const passportAuthenticationGoogle = passport.authenticate('google', {
-//   scope: ['profile', 'email'],
-//   session: false,
-// });
 
-// export const passportAuthenticationLocal = passport.authenticate('local', { session: false });
-
+export const getGoogleOAuthState = (inviteCode?: string) => generateState(inviteCode);

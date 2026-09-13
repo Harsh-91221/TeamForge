@@ -14,11 +14,13 @@ const InviteMember = () => {
 
   const [copied, setCopied] = useState(false);
 
+  const baseUrl = import.meta.env.BASE_URL || '/';
+  // The app uses HashRouter, so the invite path lives after `#`.
+  // Invite link example: http://localhost:5173/#/invite/workspace/xyz/join
   const inviteUrl = workspace
-    ? `${window.location.origin}${BASE_ROUTE.INVITE_URL.replace(
-        ':inviteCode',
-        workspace.inviteCode
-      )}`
+    ? `${window.location.origin}${
+        baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+      }#${BASE_ROUTE.INVITE_URL.replace(':inviteCode', workspace.inviteCode)}`
     : '';
 
   const handleCopy = () => {

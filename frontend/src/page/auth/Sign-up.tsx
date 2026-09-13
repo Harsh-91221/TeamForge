@@ -25,12 +25,24 @@ import { useMutation } from '@tanstack/react-query';
 import { registerMutationFn } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
 import { Loader } from 'lucide-react';
+import { useStore } from '@/store/store';
 
 const SignUp = () => {
   const navigate = useNavigate();
+  const { setAccessToekn } = useStore();
   const { mutate, isPending } = useMutation({ mutationFn: registerMutationFn });
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
+  const inviteCode = (() => {
+    const direct = searchParams.get('inviteCode');
+    if (direct) return direct;
+    if (returnUrl) {
+      const decoded = decodeURIComponent(returnUrl);
+      const match = decoded.match(/\/invite\/workspace\/([^/]+)\/join/);
+      return match ? match[1] : undefined;
+    }
+    return undefined;
+  })();
   const formSchema = z.object({
     name: z.string().trim().min(1, {
       message: 'Name is required',
@@ -38,9 +50,11 @@ const SignUp = () => {
     email: z.string().trim().email('Invalid email address').min(1, {
       message: 'Workspace name is required',
     }),
-    password: z.string().trim().min(1, {
-      message: 'Password is required',
-    }),
+    password: z.string().trim().min(8, 'Password must be at least 8 characters')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[0-9]/, 'Password must contain at least one number')
+      .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character'),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -54,10 +68,27 @@ const SignUp = () => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (isPending) return;
-    mutate(values, {
-      onSuccess: () => {
+    // If we have an inviteCode from the URL, include it in the registration payload
+    // so the backend knows to make the new user join that workspace as a member.
+    const payloadWithInvite = inviteCode
+      ? { ...values, inviteCode }
+      : values;
+    mutate(payloadWithInvite, {
+      onSuccess: (data) => {
+        // Backend now returns access_token + user on registration (auto-login).
+        if (data?.access_token) {
+          setAccessToekn(data.access_token);
+        }
         const decodeUrl = returnUrl ? decodeURIComponent(returnUrl) : null;
-        navigate(decodeUrl || '/');
+        const workspaceId = data?.user?.currentWorkspace?._id;
+        if (inviteCode) {
+          // When joining via invite, go straight to the invited workspace.
+          // The backend already set currentWorkspace to the invited workspace;
+          // fall back to the invite page if needed.
+          navigate(decodeUrl || (workspaceId ? `/workspace/${workspaceId}` : '/'));
+          return;
+        }
+        navigate(decodeUrl || (workspaceId ? `/workspace/${workspaceId}` : '/'));
       },
       onError: (error) => {
         toast({

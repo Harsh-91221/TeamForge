@@ -1,12 +1,19 @@
 import { PermissionType, TaskPriorityEnumType, TaskStatusEnumType } from '@/constant';
 
-export type loginType = { email: string; password: string };
+export type loginType = { email: string; password: string; inviteCode?: string };
 export type LoginResponseType = {
   message: string;
   access_token: string;
   user: {
     _id: string;
-    currentWorkspace: string;
+    name?: string;
+    email?: string;
+    currentWorkspace?: {
+      _id: string;
+      name?: string;
+      owner?: string;
+      inviteCode?: string;
+    };
   };
 };
 
@@ -14,6 +21,7 @@ export type registerType = {
   name: string;
   email: string;
   password: string;
+  inviteCode?: string;
 };
 
 // USER TYPE
@@ -37,6 +45,22 @@ export type UserType = {
 export type CurrentUserResponseType = {
   message: string;
   user: UserType;
+};
+
+export type RegisterResponseType = {
+  message: string;
+  access_token?: string;
+  user?: {
+    _id: string;
+    name?: string;
+    email?: string;
+    currentWorkspace?: {
+      _id: string;
+      name?: string;
+      owner?: string;
+      inviteCode?: string;
+    };
+  };
 };
 
 //******** */ WORLSPACE TYPES ****************

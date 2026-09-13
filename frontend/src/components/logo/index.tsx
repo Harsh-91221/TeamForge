@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 
 const Logo = (props: { url?: string }) => {
   const { url = '/' } = props;
+  const baseUrl = import.meta.env.BASE_URL || '/';
   return (
     <div className="flex items-center justify-center sm:justify-start">
       <Link to={url}>
@@ -10,7 +11,7 @@ const Logo = (props: { url?: string }) => {
           <AudioWaveform className="size-4" />
         </div> */}
         <img
-          src="images/teamforge-logo.png"
+          src={`${baseUrl}images/teamforge-logo.png`}
           alt="TeamForge"
           className="inline-block h-10 w-10 rounded-lg"
         />

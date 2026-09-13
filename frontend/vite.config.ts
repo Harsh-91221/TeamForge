@@ -3,7 +3,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 
 export default defineConfig({
-  base: '/TeamForge/',
+  base: process.env.NODE_ENV === 'production' ? '/TeamForge/' : '/',
   plugins: [react()],
   resolve: {
     alias: {

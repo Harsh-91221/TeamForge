@@ -1,6 +1,6 @@
 import Logo from '@/components/logo';
 import { Button } from '@/components/ui/button';
-import { getCurrentUserQueryFn } from '@/lib/api';
+import { getCurrentUserQueryFn, invitedUserJoinWorkspaceMutationFn } from '@/lib/api';
 import { Card, CardContent } from '@/components/ui/card';
 import { useStore } from '@/store/store';
 import { useEffect } from 'react';
@@ -14,19 +14,39 @@ const GoogleOAuth = () => {
   const status = params.get('status');
   const accessToken = params.get('access_token');
   const currentWorkspace = params.get('current_workspace');
+  const inviteCode = params.get('inviteCode');
 
   useEffect(() => {
     if (status === 'success' && accessToken) {
       setAccessToekn(accessToken);
 
-      getCurrentUserQueryFn()
-        .then(({ user }) => {
-          const workspaceId = currentWorkspace || user.currentWorkspace?._id;
-          navigate(workspaceId ? `/workspace/${workspaceId}` : '/');
-        })
-        .catch(() => navigate('/'));
+      // If we came via an invite link, join the workspace as a member
+      // (idempotent) and then go to the invited workspace.
+      const finish = (workspaceId?: string) => {
+        navigate(
+          workspaceId
+            ? `/workspace/${workspaceId}`
+            : currentWorkspace || '/'
+        );
+      };
+
+      const joinInvite = inviteCode
+        ? invitedUserJoinWorkspaceMutationFn(inviteCode)
+            .then((data) => data.workspaceId)
+            .catch(() => undefined)
+        : Promise.resolve(undefined);
+
+      joinInvite.then((joinedWorkspaceId) => {
+        getCurrentUserQueryFn()
+          .then(({ user }) => {
+            const workspaceId =
+              joinedWorkspaceId || currentWorkspace || user.currentWorkspace?._id;
+            finish(workspaceId);
+          })
+          .catch(() => finish(joinedWorkspaceId));
+      });
     }
-  }, [accessToken, currentWorkspace, navigate, setAccessToekn, status]);
+  }, [accessToken, currentWorkspace, inviteCode, navigate, setAccessToekn, status]);
 
   return (
     <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-muted p-6 md:p-10">

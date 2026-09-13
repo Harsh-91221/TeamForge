@@ -14,6 +14,7 @@ import useAuth from '@/hooks/api/use-auth';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { invitedUserJoinWorkspaceMutationFn } from '@/lib/api';
 import { toast } from '@/hooks/use-toast';
+import { useEffect } from 'react';
 
 const InviteUser = () => {
   const navigate = useNavigate();
@@ -31,6 +32,14 @@ const InviteUser = () => {
     `${BASE_ROUTE.INVITE_URL.replace(':inviteCode', inviteCode)}`
   );
 
+  // Auto-join if the user is already logged in (no manual click needed).
+  useEffect(() => {
+    if (user && !isPending && !isLoading) {
+      mutate(inviteCode);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user, isPending, inviteCode]);
+
   const handleSubmit = (e: { preventDefault: () => void }) => {
     e.preventDefault();
     mutate(inviteCode, {
@@ -38,6 +47,7 @@ const InviteUser = () => {
         queryClient.resetQueries({
           queryKey: ['userWorkspaces'],
         });
+        queryClient.invalidateQueries({ queryKey: ['members', data.workspaceId] });
         navigate(`/workspace/${data.workspaceId}`);
       },
       onError: (error) => {

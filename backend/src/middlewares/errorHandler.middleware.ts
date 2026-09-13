@@ -3,6 +3,7 @@ import { HTTPSTATUS } from '../config/http.config';
 import { AppError } from '../utils/appError';
 import { ZodError } from 'zod';
 import { ErrorCodeEnum } from '../enums/error-code.enum';
+import { config } from '../config/app.config';
 
 const formatZodError = (res: Response, error: ZodError) => {
   const errors = error?.issues?.map((err) => ({
@@ -37,7 +38,7 @@ export const errorHandler: ErrorRequestHandler = (error, req, res, next): any =>
 
   return res.status(HTTPSTATUS.INTERNAL_SERVER_ERROR).json({
     message: 'Internal server error',
-    error: error?.message || 'Unkown error occured',
+    error: config.NODE_ENV === 'production' ? undefined : (error?.message || 'Unknown error occurred'),
   });
 };
 

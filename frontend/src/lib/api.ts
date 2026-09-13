@@ -20,6 +20,7 @@ import {
   loginType,
   ProjectByIdPayloadType,
   ProjectResponseType,
+  RegisterResponseType,
   registerType,
   TaskResponseType,
   UpdateByIdPayloadType,
@@ -31,8 +32,12 @@ export const loginMutationFn = async (data: loginType): Promise<LoginResponseTyp
   return response.data;
 };
 
-export const registerMutationFn = async (data: registerType) =>
-  await API.post(`/auth/register`, data);
+export const registerMutationFn = async (
+  data: registerType
+): Promise<RegisterResponseType> => {
+  const response = await API.post(`/auth/register`, data);
+  return response.data;
+};
 
 export const logoutMutationFn = async () => await API.post('/auth/logout');
 

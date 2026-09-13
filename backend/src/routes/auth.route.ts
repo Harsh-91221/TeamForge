@@ -9,6 +9,7 @@ import {
   logOutController,
   registerUserController,
 } from '../controllers/auth.controller';
+import { getGoogleOAuthState } from '../config/passport.config';
 
 const authRoutes = Router();
 
@@ -26,10 +27,16 @@ if (
 
   authRoutes.get(
     '/google',
-    passport.authenticate('google', {
-      scope: ['email', 'profile'],
-      session: false,
-    })
+    (req: Request, res: Response, next) => {
+      // If the user started Google sign-in from an invite link, pass the invite
+      // code through a signed OAuth `state` param so it survives the round-trip.
+      const inviteCode = (req.query.inviteCode as string) || undefined;
+      passport.authenticate('google', {
+        scope: ['email', 'profile'],
+        state: getGoogleOAuthState(inviteCode),
+        session: false,
+      })(req, res, next);
+    }
   );
 
   authRoutes.get(

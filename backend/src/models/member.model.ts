@@ -35,6 +35,8 @@ const memberSchema = new Schema<MemberDocument>(
   }
 );
 
+memberSchema.index({ userId: 1, workspaceId: 1 }, { unique: true });
+
 const MemberModel = mongoose.model<MemberDocument>('Member', memberSchema);
 
 export default MemberModel;

@@ -1,10 +1,42 @@
 import { baseURL } from '@/lib/base-url';
 import { Button } from '../ui/button';
 
+// Extract the invite code from the hash portion of the URL (HashRouter).
+// The invite page redirects to "/#/invite/workspace/:code/join" or 
+// sign-in/sign-up pages may carry ?inviteCode= in the hash query.
+const getInviteCodeFromHash = () => {
+  const hash = window.location.hash || '';
+  // Remove leading # and split on ?
+  const queryStr = hash.split('?')[1] || '';
+  const params = new URLSearchParams(queryStr);
+  
+  // Direct ?inviteCode= in hash query
+  const direct = params.get('inviteCode');
+  if (direct) return direct;
+
+  // returnUrl in hash query (from InviteUser page)
+  const returnUrl = params.get('returnUrl');
+  if (returnUrl) {
+    try {
+      const decoded = decodeURIComponent(returnUrl);
+      // Match /invite/workspace/:code/join in the hash path
+      const match = decoded.match(/\/invite\/workspace\/([^/]+)\/join/);
+      if (match) return match[1];
+    } catch {
+      // ignore malformed returnUrl
+    }
+  }
+  return undefined;
+};
+
+export { getInviteCodeFromHash };
+
 const GoogleOauthButton = (props: { label: string }) => {
   const { label } = props;
   const handleClick = () => {
-    window.location.href = `${baseURL}/auth/google`;
+    const inviteCode = getInviteCodeFromHash();
+    const query = inviteCode ? `?inviteCode=${encodeURIComponent(inviteCode)}` : '';
+    window.location.href = `${baseURL}/auth/google${query}`;
   };
   return (
     <Button onClick={handleClick} variant="outline" type="button" className="w-full">

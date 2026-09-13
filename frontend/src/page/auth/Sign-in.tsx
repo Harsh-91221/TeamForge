@@ -29,10 +29,21 @@ import { useStore } from '@/store/store';
 
 const SignIn = () => {
   const navigate = useNavigate();
+  const { setAccessToekn } = useStore();
+
+  // The invite page sends users here with `returnUrl=<encoded invite link>` (or ?inviteCode=)
   const [searchParams] = useSearchParams();
   const returnUrl = searchParams.get('returnUrl');
-
-  const { setAccessToekn } = useStore();
+  const inviteCode = (() => {
+    const direct = searchParams.get('inviteCode');
+    if (direct) return direct;
+    if (returnUrl) {
+      const decoded = decodeURIComponent(returnUrl);
+      const match = decoded.match(/\/invite\/workspace\/([^/]+)\/join/);
+      return match ? match[1] : undefined;
+    }
+    return undefined;
+  })();
 
   const { mutate, isPending } = useMutation({ mutationFn: loginMutationFn });
 
@@ -40,9 +51,11 @@ const SignIn = () => {
     email: z.string().trim().email('Invalid email address').min(1, {
       message: 'Workspace name is required',
     }),
-    password: z.string().trim().min(1, {
-      message: 'Password is required',
-    }),
+    password: z.string().trim().min(8, 'Password must be at least 8 characters')
+      .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+      .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+      .regex(/[0-9]/, 'Password must contain at least one number')
+      .regex(/[^a-zA-Z0-9]/, 'Password must contain at least one special character'),
   });
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -55,13 +68,17 @@ const SignIn = () => {
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     if (isPending) return;
-    mutate(values, {
+    // If we came from an invite link, include the invite code in the login payload
+    // so the backend joins the workspace as a member after authentication.
+    const payloadWithInvite = inviteCode ? { ...values, inviteCode } : values;
+    mutate(payloadWithInvite, {
       onSuccess: (data) => {
         const accessToekn = data.access_token;
         const user = data.user;
         setAccessToekn(accessToekn);
         const decodeUrl = returnUrl ? decodeURIComponent(returnUrl) : null;
-        navigate(decodeUrl || `/workspace/${user.currentWorkspace}`);
+        const workspaceId = user.currentWorkspace?._id;
+        navigate(decodeUrl || (workspaceId ? `/workspace/${workspaceId}` : '/'));
       },
       onError: (error) => {
         toast({

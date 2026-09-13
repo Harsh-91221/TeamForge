@@ -6,10 +6,11 @@ import { RolePermissions } from '../utils/role-permission';
 
 const seedRoles = async () => {
   console.log('Seeding role started...');
+  let session: mongoose.ClientSession | null = null;
 
   try {
     await connectDatabase();
-    const session = await mongoose.startSession();
+    session = await mongoose.startSession();
     session.startTransaction();
 
     console.log('Clearing existing roles');
@@ -33,12 +34,14 @@ const seedRoles = async () => {
     }
     await session.commitTransaction();
     console.log('Transaction Committed');
-    await session.endSession();
-    console.log('Session ended');
     console.log('Seeding completed successfully.');
     await mongoose.disconnect();
   } catch (error) {
     console.error('Error during seeding:', error);
+  } finally {
+    if (session) {
+      await session.endSession();
+    }
   }
 };
 
