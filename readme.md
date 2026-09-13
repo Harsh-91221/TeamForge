@@ -10,6 +10,13 @@ TeamForge is a powerful, scalable multi-tenancy project management platform buil
 
 ---
 
+## 📚 Documentation
+
+- [Project Overview Walkthrough](https://harsh-91221.github.io/TeamForge/walkthrough-teamforge-overview.html)
+- [Database Schema Walkthrough](https://harsh-91221.github.io/TeamForge/walkthrough-teamforge-database-schema.html)
+
+---
+
 ## 📌 Project Highlights
 
 - 🔐 Google & Email Authentication
