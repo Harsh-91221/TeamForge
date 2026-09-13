@@ -37,6 +37,15 @@ jobs:
           VITE_API_BASE_URL: ${{ secrets.VITE_API_BASE_URL }}
           FRONTEND_GOOGLE_CALLBACK_URL: https://harsh-91221.github.io/TeamForge/
 
+      - name: Copy documentation to dist
+        run: |
+          if [ -d "../docs" ]; then
+            cp -r ../docs/* ./frontend/dist/
+            echo "Documentation files copied to dist"
+          else
+            echo "No docs folder found"
+          fi
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
