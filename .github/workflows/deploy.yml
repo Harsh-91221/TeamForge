@@ -43,4 +43,5 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }} # Uses GitHub token
           publish_branch: gh-pages # Specifies the correct branch
           publish_dir: ./frontend/dist
+          keep_files: true
 
