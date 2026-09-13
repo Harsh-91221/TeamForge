@@ -15,13 +15,13 @@ permissions:
   id-token: write
 
 concurrency:
-  group: "pages"
+  group: "docs-pages"
   cancel-in-progress: true
 
 jobs:
   deploy:
     environment:
-      name: github-pages
+      name: docs-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
